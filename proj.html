@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skin Cancer Detection</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #ff3b3b;
+        --secondary: #d41414; 
+        --background: #0c0b0b; 
+        --card-bg: #1a1a1a; 
+        --text-light: #ffffff;
+        --text-muted: #aaaaaa;
+        --error: #ff4c4c;
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background: var(--background);
+        color: var(--text-light);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    h1.main-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--primary);
+        text-shadow: 0 0 8px    rgba(255, 59, 59, 0.8);
+    }
+
+    .container {
+        max-width: 400px;
+        width: 100%;
+        padding: 30px;
+    }
+
+    .card {
+        background: linear-gradient(145deg, #1a1a1a, #111);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 30px rgba(234, 23, 23, 0.3);
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    h2 {
+        margin: 0 0 18px;
+        font-weight: 600;
+    }
+
+    input, button {
+        width: 98%;
+        padding: 12px;
+        margin-top: 10px;
+        border-radius: 10px;
+        border: 2px  rgb(17, 15, 15);
+
+        font-size: 14px;
+    }
+
+    input {
+        background: #2a2a2a;
+        color: var(--text-light);
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    input::placeholder {
+        color: var(--text-muted);
+    }
+
+    button {
+        background: var(--primary);
+        color: rgb(8, 8, 7);
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: var(--secondary);
+        box-shadow: 0 0 8px rgba(255, 59, 59, 0.6);
+    }
+
+    .file-label {
+        background: var(--secondary);
+        display: block;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .file-label:hover {
+        background: var(--primary);
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .image-preview {
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        border-radius: 8px;
+        display: none;
+    }
+
+    .loading {
+        margin-top: 15px;
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    .error {
+        color: var(--error);
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .actions button {
+        flex: 1;
+        font-size: 13px;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(10px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+</style>
+</head>
+<body>
+
+<h1 class="main-title">Skin Cancer Detection</h1>
+
+<div class="container">
+    <div class="card" id="step1">
+        <h2>Patient Details</h2>
+        <input type="text" id="nameInput" placeholder="Enter Your Name" required>
+        <input type="number" id="ageInput" placeholder="Enter Your Age" min="1" max="80" required>
+        <button id="continueBtn">Continue</button>
+    </div>
+
+    <div class="card hidden" id="step2">
+        <h2>Upload Skin Image</h2>
+        <p id="userInfo"></p>
+        <label for="fileInput" class="file-label">Choose Skin Image</label>
+        <input type="file" id="fileInput" accept="image/*" class="hidden">
+        <div class="image-preview">
+            <img id="previewImage" alt="Image Preview">
+        </div>
+        <button id="predictBtn">Predict Skin Cancer</button>
+        <div class="loading hidden" id="loadingIndicator">Processing prediction...</div>
+        <p id="predictionText"></p>
+        <p class="error" id="errorMessage"></p>
+        <div class="actions">
+            <button id="uploadAgainBtn" style="background: var(--secondary);">Upload Again</button>
+            <button id="homeBtn" style="background: var(--error);">Return Home</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const nameInput = document.getElementById('nameInput');
+    const ageInput = document.getElementById('ageInput');
+    const continueBtn = document.getElementById('continueBtn');
+    const userInfo = document.getElementById('userInfo');
+
+    const fileInput = document.getElementById('fileInput');
+    const previewImage = document.getElementById('previewImage');
+    const predictBtn = document.getElementById('predictBtn');
+    const predictionText = document.getElementById('predictionText');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorMessage = document.getElementById('errorMessage');
+    const uploadAgainBtn = document.getElementById('uploadAgainBtn');
+    const homeBtn = document.getElementById('homeBtn');
+
+    continueBtn.addEventListener('click', () => {
+        if (!nameInput.value || !ageInput.value) {
+            alert('Please fill in your details');
+            return;
+        }
+        userInfo.textContent = `Patient: ${nameInput.value}, Age: ${ageInput.value}`;
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+    });
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                previewImage.style.animation = 'fadeIn 0.5s ease';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    predictBtn.addEventListener('click', async () => {
+        errorMessage.textContent = '';
+        predictionText.textContent = '';
+        if (!fileInput.files.length) {
+            errorMessage.textContent = 'Please select an image first';
+            return;
+        }
+
+        loadingIndicator.classList.remove('hidden');
+
+        try {
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const res = await fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+
+            loadingIndicator.classList.add('hidden');
+
+            if (data.error) {
+                errorMessage.textContent = data.error;
+            } else {
+                predictionText.textContent = `${data.class} (Confidence: ${data.confidence})`;
+            }
+
+        } catch (err) {
+            loadingIndicator.classList.add('hidden');
+            errorMessage.textContent = "Server error: " + err;
+        }
+    });
+
+    uploadAgainBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        previewImage.style.display = 'none';
+        predictionText.textContent = '';
+        errorMessage.textContent = '';
+    });
+
+    homeBtn.addEventListener('click', () => {
+        step2.classList.add('hidden');
+        step1.classList.remove('hidden');
+        nameInput.value = '';
+        ageInput.value = '';
+        fileInput.value = '';
+        previewImage.style.display = 'none';
+        predictionText.textContent = '';
+        errorMessage.textContent = '';
+    });
+</script>
+
+</body>
+</html>
